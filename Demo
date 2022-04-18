@@ -1,0 +1,28 @@
+This is the first commit"
+    end
+
+    it "should not be able to create a commit with a blank message" do
+      post :create, :project_id => @project.id, :repository_id => @repository.id, :commit => {:message => ""}
+      response.should redirect_to(project_repository_commits_path(@project, @repository))
+      flash[:error].should == "Commit message can't be blank"
+    end
+
+    it "should not be able to create a commit with a message that is too long" do
+      post :create, :project_id => @project.id, :repository_id => @repository.id, :commit => {:message => "a" * 1001}
+      response.should redirect_to(project_repository_commits_path(@project, @repository))
+      flash[:error].should == "Commit message is too long (maximum is 1000 characters)"
+    end
+
+    it "should be able to create a commit with a message that is exactly 1000 characters" do
+      post :create, :project_id => @project.id, :repository_id => @repository.id, :commit => {:message => "a" * 1000}
+      response.should redirect_to(project_repository_commits_path(@project, @repository))
+      flash[:success].should == "This is the first commit"
+    end
+
+    it "should be able to create a commit with a message that is exactly 1000 characters and a long file name" do
+      post :create, :project_id => @project.id, :repository_id => @repository.id, :commit => {:message => "a" * 1000, :files => [{:name => "a" * 1001}]}
+      response.should redirect_to(project_repository_commits_path(@project, @repository))
+      flash[:success].should == "This is the first commit"
+    end
+
+    it "should be able to create a commit with a message that is exactly 1000 characters and a long file name and a long file content" do
